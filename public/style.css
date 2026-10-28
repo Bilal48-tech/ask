@@ -126,7 +126,7 @@ textarea{flex:1;border:0;outline:0;resize:none;background:none;color:inherit;fon
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#chat{scroll-behavior:auto}}
 @media print{
- aside,#ov,.sk,#toast,.modes,footer,#menu,#exp,#fs,#thm,#pin,#dn{display:none!important}
+ aside,#ov,.sk,#toast,.modes,footer,#menu,#exp,#thm,#dn{display:none!important}
  body,html{height:auto;overflow:visible;background:#fff}
  main,#chat{overflow:visible}
  .row{animation:none;break-inside:avoid}

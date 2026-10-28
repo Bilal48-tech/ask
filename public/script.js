@@ -1,7 +1,7 @@
 (function(){
 var $=function(i){return document.getElementById(i)};
 var K='askanything.pro.v1',LIMIT=4000;
-var S={chats:[],cur:null,mode:'general',theme:'',fs:16,vl:'en-US'};
+var S={chats:[],cur:null,mode:'general',theme:'',vl:'en-US'};
 var dl=null,ctl=null,busy=false,raf=null,trashed=null,editing=-1,tt=null,tin=false;
 var BASE='You are a friendly, knowledgeable assistant. Answer any question clearly and accurately, in the same language the person writes in (including Urdu). Use short paragraphs, lists and fenced code blocks where helpful. If unsure, say so. For medical, legal or financial questions give general information and suggest a professional.';
 var MODES={general:['General',''],simple:['Simple','Explain in very simple words with a short everyday example.'],dev:['Developer','You are also an expert web developer: give modern, working code in fenced blocks with brief explanations.'],brief:['Brief','Answer in one to three sentences unless asked for more.']};
@@ -12,18 +12,18 @@ try{var raw=localStorage.getItem(K);if(raw)S=Object.assign(S,JSON.parse(raw));}c
 if(!Array.isArray(S.chats))S.chats=[];
 S.chats.forEach(function(c){
  c.msgs=Array.isArray(c.msgs)?c.msgs.filter(function(m){return m&&typeof m.content==='string'&&typeof m.role==='string';}).filter(function(m){return m.role!=='assistant'||m.content.trim();}):[];
- c.ts=+c.ts||+c.id||Date.now();c.pin=!!c.pin;c.title=String(c.title||'Untitled');
+ c.ts=+c.ts||+c.id||Date.now();c.title=String(c.title||'Untitled');
 });
 S.chats=S.chats.filter(function(c){return c.msgs.length;});
 sort();
 
-function sort(){S.chats.sort(function(a,b){return (b.pin?1:0)-(a.pin?1:0)||b.ts-a.ts});}
+function sort(){S.chats.sort(function(a,b){return b.ts-a.ts});}
 function save(){
  try{localStorage.setItem(K,JSON.stringify(S));return true;}
  catch(e){toast('Storage is full, so the latest chat was not saved.');return false;}
 }
 function cur(){var c=S.chats.filter(function(x){return x.id===S.cur})[0];if(!c){c=mk();}return c;}
-function mk(){var c={id:String(Date.now()),title:'New chat',msgs:[],ts:Date.now(),pin:false};S.chats.unshift(c);S.cur=c.id;return c;}
+function mk(){var c={id:String(Date.now()),title:'New chat',msgs:[],ts:Date.now()};S.chats.unshift(c);S.cur=c.id;return c;}
 function touch(c){c.ts=Date.now();sort();}
 function byId(id){return S.chats.filter(function(c){return c.id===id})[0];}
 function announce(t){$('status').textContent=t;}
@@ -102,7 +102,7 @@ function side(){
  }
  var last='';
  list.forEach(function(c){
-  var grp=c.pin?'Pinned':day(c.ts);
+  var grp=day(c.ts);
   if(grp!==last){last=grp;var h=document.createElement('p');h.className='day';h.textContent=grp;L.appendChild(h);}
   var row=document.createElement('div');row.className='it'+(c.id===S.cur?' on':'');row.setAttribute('role','listitem');
   var tb=document.createElement('button');tb.type='button';tb.className='tb';
@@ -110,7 +110,6 @@ function side(){
   tb.appendChild(sp);
   tb.onclick=function(){if(busy)return wait();S.cur=c.id;touch(c);save();drawer(false);draw();$('q').focus();};
   row.appendChild(tb);
-  row.appendChild(cbtn('📌',c.pin?'Unpin chat: ':'Pin chat: ',c,function(){c.pin=!c.pin;sort();save();draw();}));
   row.appendChild(cbtn('✎','Rename chat: ',c,function(){rename(c,sp);}));
   row.appendChild(cbtn('×','Delete chat: ',c,function(){del(c);}));
   L.appendChild(row);
@@ -168,8 +167,7 @@ function draw(){
  var c=cur(),col=$('col');col.innerHTML='';editing=-1;tin=false;
  $('ttl').textContent=c.title;
  var has=!!c.msgs.length;
- $('exp').hidden=$('pin').hidden=!has;
- $('pin').setAttribute('aria-pressed',String(!!c.pin));
+ $('exp').hidden=!has;
  if(!has){
   var h=document.createElement('div');h.className='hero';
   h.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 96 96" role="img" aria-label="Askwise logo" class="hlogo"><rect width="96" height="96" rx="26" fill="#4338CA"/><rect x="20" y="22" width="56" height="42" rx="14" fill="#fff"/><path d="M30 60 L27 77 L46 63 Z" fill="#fff"/><path d="M48 30 C49 38 53 42 62 43 C53 44 49 48 48 56 C47 48 43 44 34 43 C43 42 47 38 48 30 Z" fill="#4338CA"/></svg><h2>What would you like to know?</h2><p>Ask about any topic — science, code, travel, health basics, homework and more.</p><div class="cards"></div>';
@@ -359,7 +357,6 @@ $('dn').onclick=function(){var e=$('chat');try{e.scrollTo({top:e.scrollHeight,be
 $('chat').addEventListener('scroll',function(){$('dn').classList.toggle('show',!nearBottom());},{passive:true});
 var st;
 $('srch').addEventListener('input',function(){clearTimeout(st);st=setTimeout(side,140);});
-$('pin').onclick=function(){var c=cur();c.pin=!c.pin;sort();save();draw();toast(c.pin?'Chat pinned.':'Chat unpinned.');};
 $('ttl').ondblclick=function(){
  if(tin||busy)return;
  var c=cur(),h=$('ttl');tin=true;
@@ -389,8 +386,6 @@ $('thm').onclick=function(){
   black: '🖤 Welcome to Black theme'
 }[S.theme]);
 };
-function fsz(){document.body.style.fontSize=(S.fs||16)+'px';$('fs').setAttribute('title','Text size: '+(S.fs||16)+'px');}
-$('fs').onclick=function(){var z=[15,16,18,20];S.fs=z[(z.indexOf(S.fs||16)+1)%4];fsz();save();toast('Text size '+(S.fs)+'px');};
 
 function chatMd(c){
  return '# '+c.title+'\n\n'+c.msgs.filter(function(m){return !m.err;}).map(function(m){
@@ -430,7 +425,7 @@ document.addEventListener('keydown',function(e){
  else if(e.key==='/'&&!/^(TEXTAREA|INPUT)$/.test((document.activeElement||{}).tagName||'')){e.preventDefault();$('q').focus();}
 });
 
-theme();fsz();modes();counter();
+theme();modes();counter();
 try{if(window.claude&&window.claude.use)window.claude.use('downloads').then(function(d){dl=d;}).catch(function(){});}catch(e){}
 draw();
 
