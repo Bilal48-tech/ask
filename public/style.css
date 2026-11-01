@@ -234,6 +234,7 @@ aside {
 
 .sidefoot {
   display: flex;
+  flex-direction: column;
   gap: 6px;
   padding-top: 8px;
   border-top: 1px solid var(--line);
@@ -250,6 +251,40 @@ aside {
 }
 
 .sf:hover { color: var(--ac); border-color: var(--ac); }
+
+.signup-dialog {
+  width: min(92vw, 440px);
+  max-width: none;
+  max-height: min(90dvh, 760px);
+  padding: 0;
+  overflow: auto;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px #0005;
+}
+
+.signup-dialog::backdrop { background: #11112699; backdrop-filter: blur(4px); }
+.signup-card { display: flex; flex-direction: column; gap: 10px; padding: 24px; }
+.signup-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.signup-heading h2 { margin: 0; font-size: 22px; line-height: 1.3; }
+.signup-heading p { margin: 5px 0 0; color: var(--muted); font-size: 14px; }
+.signup-close { flex: none; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 9px; background: var(--card); font-size: 22px; line-height: 1; }
+.signup-label { margin-top: 3px; font-size: 13px; font-weight: 650; }
+.signup-input { width: 100%; min-width: 0; padding: 10px 12px; color: var(--text); background: var(--card); border: 1px solid var(--line); border-radius: 10px; font: inherit; }
+.signup-input:focus { outline: 2px solid var(--ac); outline-offset: 1px; }
+.password-field { position: relative; }
+.password-field .signup-input { padding-right: 46px; }
+.password-toggle { position: absolute; top: 50%; right: 6px; width: 34px; height: 34px; display: grid; place-items: center; transform: translateY(-50%); border: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+.password-toggle:hover { color: var(--ac); background: #6d5efc12; }
+.password-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.signup-message { min-height: 1.4em; margin: 2px 0 0; color: var(--warn-text); font-size: 13px; }
+.signup-message.ok { color: var(--ok); }
+.signup-submit { width: 100%; margin-top: 2px; padding: 11px 14px; border: 0; border-radius: 11px; color: #fff; background: var(--g); font-weight: 700; }
+.signup-submit:hover { filter: brightness(1.06); }
+
+@media (max-width: 480px) { .signup-card { padding: 20px; } }
 
 main {
   flex: 1;

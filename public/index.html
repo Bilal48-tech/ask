@@ -37,6 +37,7 @@
 
     <div class="sidefoot">
       <button class="sf" id="clr" type="button">Clear all</button>
+      <button class="sf signup-trigger" id="signup-open" type="button">Sign up</button>
     </div>
   </aside>
 
@@ -73,6 +74,43 @@
     </footer>
   </main>
 </div>
+
+<dialog id="signup-dialog" class="signup-dialog" aria-labelledby="signup-title">
+  <form id="signup-form" class="signup-card">
+    <div class="signup-heading">
+      <div>
+        <h2 id="signup-title">Create your account</h2>
+        <p>Sign up to get started with Askwise.</p>
+      </div>
+      <button class="signup-close" id="signup-close" type="button" aria-label="Close sign-up form">×</button>
+    </div>
+
+    <label class="signup-label" for="signup-username">Username</label>
+    <input class="signup-input" id="signup-username" name="username" type="text" autocomplete="username" minlength="3" maxlength="40" required>
+
+    <label class="signup-label" for="signup-email">Email</label>
+    <input class="signup-input" id="signup-email" name="email" type="email" autocomplete="email" required>
+
+    <label class="signup-label" for="signup-password">Password</label>
+    <div class="password-field">
+      <input class="signup-input" id="signup-password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="password-toggle" type="button" data-password-target="signup-password" aria-label="Show password" aria-pressed="false" title="Show password">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+
+    <label class="signup-label" for="signup-confirm-password">Confirm password</label>
+    <div class="password-field">
+      <input class="signup-input" id="signup-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="password-toggle" type="button" data-password-target="signup-confirm-password" aria-label="Show confirm password" aria-pressed="false" title="Show password">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+
+    <p class="signup-message" id="signup-message" role="status" aria-live="polite"></p>
+    <button class="signup-submit" type="submit">Create account</button>
+  </form>
+</dialog>
 
 <div id="ov" aria-hidden="true"></div>
 <p id="status" class="sr" role="status" aria-live="polite"></p>

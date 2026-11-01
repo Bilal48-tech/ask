@@ -414,6 +414,38 @@ $('clr').onclick=function(){
  });
 };
 
+var signupDialog=$('signup-dialog'),signupForm=$('signup-form'),signupMessage=$('signup-message');
+$('signup-open').onclick=function(){
+ if(typeof signupDialog.showModal==='function')signupDialog.showModal();
+ else signupDialog.setAttribute('open','');
+ $('signup-username').focus();
+};
+$('signup-close').onclick=function(){signupDialog.close();};
+signupDialog.addEventListener('click',function(e){if(e.target===signupDialog)signupDialog.close();});
+signupDialog.addEventListener('close',function(){signupMessage.textContent='';signupMessage.classList.remove('ok');});
+document.querySelectorAll('.password-toggle').forEach(function(btn){
+ btn.onclick=function(){
+  var input=$(btn.getAttribute('data-password-target')),show=input.type==='password';
+  input.type=show?'text':'password';
+  btn.setAttribute('aria-pressed',String(show));
+  btn.setAttribute('aria-label',(show?'Hide ':'Show ')+(input.id==='signup-password'?'password':'confirm password'));
+  btn.title=show?'Hide password':'Show password';
+  input.focus();
+ };
+});
+signupForm.addEventListener('submit',function(e){
+ e.preventDefault();
+ var password=$('signup-password').value,confirmPassword=$('signup-confirm-password').value;
+ signupMessage.classList.remove('ok');
+ if(password!==confirmPassword){
+  signupMessage.textContent='Passwords do not match.';
+  $('signup-confirm-password').focus();
+  return;
+ }
+ signupMessage.classList.add('ok');
+ signupMessage.textContent='Form validated. Connect a signup API to create an account.';
+});
+
 document.addEventListener('keydown',function(e){
  if(e.key==='Escape'){
   if(document.body.classList.contains('open')){drawer(false);}
