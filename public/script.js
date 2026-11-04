@@ -460,29 +460,108 @@ document.addEventListener('keydown',function(e){
 theme();modes();counter();
 try{if(window.claude&&window.claude.use)window.claude.use('downloads').then(function(d){dl=d;}).catch(function(){});}catch(e){}
 draw();
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(SR){
- $('mic').hidden=false;$('vl').hidden=false;
- function vl(){$('vl').textContent=S.vl==='ur-PK'?'اردو':'EN';$('vl').setAttribute('aria-label','Voice language: '+$('vl').textContent);}
- vl();
- $('vl').onclick=function(){S.vl=S.vl==='ur-PK'?'en-US':'ur-PK';vl();save();};
- var rec=null,heard='';
- $('mic').onclick=function(){
-  if(busy){wait();return;}
-  if(rec){rec.stop();return;}
-  rec=new SR();rec.lang=S.vl||'en-US';rec.interimResults=true;rec.continuous=false;heard='';
-  rec.onresult=function(e){
-   var s='';for(var i=0;i<e.results.length;i++)s+=e.results[i][0].transcript;
-   var q=$('q'),v=q.value;
-   if(heard&&v.slice(-heard.length)===heard)q.value=v.slice(0,v.length-heard.length)+s;
-   else q.value=(v?v+' ':'')+s;
-   heard=s;q.dispatchEvent(new Event('input'));
+if (SR) {
+  var rec = null;
+  var heard = '';
+  var micStream = null;
+
+  $('mic').hidden = false;
+
+  $('mic').onclick = async function () {
+    if (busy) {
+      wait();
+      return;
+    }
+
+    if (rec) {
+      rec.stop();
+      return;
+    }
+
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast('Mic ke liye localhost ya HTTPS par page kholo.');
+        return;
+      }
+
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      micStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+      micStream = null;
+
+      rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = true;
+      rec.continuous = false;
+      heard = '';
+
+      rec.onstart = function () {
+        $('mic').classList.add('rec');
+        $('mic').setAttribute('aria-label', 'Stop voice input');
+        toast('Listening…');
+      };
+
+      rec.onresult = function (e) {
+        var transcript = '';
+
+        for (var i = 0; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+
+        var q = $('q');
+        var value = q.value;
+
+        if (heard && value.slice(-heard.length) === heard) {
+          q.value = value.slice(0, value.length - heard.length) + transcript;
+        } else {
+          q.value = (value ? value + ' ' : '') + transcript;
+        }
+
+        heard = transcript;
+        q.dispatchEvent(new Event('input'));
+      };
+
+      rec.onerror = function (e) {
+        var messages = {
+          'not-allowed': 'Chrome site settings mein Microphone ko Allow karo.',
+          'service-not-allowed': 'Browser ne speech recognition block kar di.',
+          'network': 'Speech recognition ke liye internet connection chahiye.',
+          'audio-capture': 'Microphone detect nahi hua.',
+          'no-speech': 'Awaaz detect nahi hui. Dobara bol kar try karo.'
+        };
+
+        toast(messages[e.error] || 'Microphone error: ' + e.error);
+      };
+
+      rec.onend = function () {
+        rec = null;
+        heard = '';
+        $('mic').classList.remove('rec');
+        $('mic').setAttribute('aria-label', 'Voice input');
+      };
+
+      rec.start();
+    } catch (error) {
+      if (micStream) {
+        micStream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        micStream = null;
+      }
+
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        toast('Chrome mein localhost ki Microphone permission Allow karo.');
+      } else if (error.name === 'NotFoundError') {
+        toast('Computer mein microphone nahi mila.');
+      } else {
+        toast('Mic error: ' + error.message);
+      }
+    }
   };
-  rec.onstart=function(){$('mic').classList.add('rec');$('mic').setAttribute('aria-label','Stop voice input');};
-  rec.onend=function(){rec=null;heard='';$('mic').classList.remove('rec');$('mic').setAttribute('aria-label','Voice input');};
-  rec.onerror=function(e){rec=null;heard='';$('mic').classList.remove('rec');toast('Microphone: '+(e&&e.error||'not available'));};
-  rec.start();
- };
 }
 })();
+
